@@ -5,49 +5,88 @@ const c = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Fill the background with a semi-transparent blue rectangle
-
 // Array to hold rectangle objects
-const rectangles = [];
-
+const gridSize = 30;
+const grid = [];
+let start = null;
+let end = null;
+let dragging = false;
+let dragTarget = null;
 
 // Define colors for each class
 const colors = {
-    class1: 'rgba(200, 9, 0, 0.8)',  // red
-    class2: 'rgba(0, 150, 255, 0.8)',  // blue
-    class3: 'rgba(0, 255, 150, 0.8)'  // green
+    class0: 'rgba(200, 9, 0, 0.8)',  // red
+    class1: 'rgba(0, 150, 255, 0.8)',  // blue
+    class2: 'rgba(0, 255, 150, 0.8)', // green
+    class3: 'rgba(0, 250, 150, 0.8)'  // light green
 };
 
-// Create a grid of rectangles
-for (let j = 30; j < 300; j += 33) {
-    for (let i = 150; i < 300; i += 33) {
-        const rectClass = 'class1';  // Set the class for the rectangle
-        
-        // Create a rectangle object
-        const rectangle = {
-            x: i,
-            y: j,
-            width: 30,
-            height: 30,
-            class: rectClass  // Use rectClass here
-        };
-        
-        // Add the rectangle object to the array
-        rectangles.push(rectangle);
+// Array to count occurrences of each type of cell
+const counts = [0, 0, 0];
+
+function setup() {
+    const rows = Math.floor(canvas.height / gridSize);
+    const cols = Math.floor(canvas.width / gridSize);
+
+    for (let i = 0; i < cols; i++) {
+        grid[i] = [];
+        for (let j = 0; j < rows; j++) {
+            // Create a rectangle object with initial state 0
+            const rectangle = {
+                x: i * gridSize,
+                y: j * gridSize,
+                width: gridSize,
+                height: gridSize,
+                class: 'class0',  // Start with class0
+                state: 0
+            };
+            grid[i][j] = rectangle;
+        }
     }
 }
 
-// Function to draw the rectangles on the canvas
 function draw() {
-    rectangles.forEach(rect => {
-        c.fillStyle = colors[rect.class];  // Use rect.class here
-        c.fillRect(rect.x, rect.y, rect.width, rect.height);
-    });
+    c.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas before drawing
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            const rect = grid[i][j];
+            c.fillStyle = colors[rect.class];  // Use rect.class here
+            c.fillRect(rect.x, rect.y, rect.width, rect.height);
+            c.strokeRect(rect.x, rect.y, rect.width, rect.height);  // Outline the grid
+        }
+    }
 }
-for(let i=0;i<19;i++){
-    rectangles[i].class='class2';
-    draw();
-}
-rectangles[0].class='class1';
-// Call the draw function to render the rectangles
+
+canvas.addEventListener('click', function(event) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            const cell = grid[i][j];
+            if (mouseX > cell.x && mouseX < cell.x + cell.width &&
+                mouseY > cell.y && mouseY < cell.y + cell.height) {
+                console.log(`Cell [${i}, ${j}] clicked!`);  // Log the clicked cell
+
+                // Decrement the count for the current state
+                counts[cell.state]--;
+
+                // Increment the state and wrap it using modulo
+                cell.state = (cell.state + 1) % 4;
+                counts[cell.state]++;
+
+                // Update the class based on the state
+                cell.class = `class${cell.state}`;
+
+                console.log(cell.class); // Debugging output for the class
+
+                draw();  // Redraw the grid with the updated colors
+            }
+        }
+    }
+});
+
+// Initial setup and drawing
+setup();
 draw();
