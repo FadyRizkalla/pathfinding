@@ -1,92 +1,224 @@
 const canvas = document.getElementById("canvas1");
 const c = canvas.getContext('2d');
 
-// Set the canvas dimensions
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// Set the canvas dimensions to 150x150 pixels
+canvas.width = 150;
+canvas.height = 150;
 
-// Array to hold rectangle objects
-const gridSize = 30;
+// Grid and cell size
+const cellSize = 30;
 const grid = [];
+
+// Start and end points
 let start = null;
 let end = null;
+
+// Dragging state
 let dragging = false;
 let dragTarget = null;
+const dirx = [0, 0, 1, -1];
+const diry = [1, -1, 0, 0];
 
 // Define colors for each class
 const colors = {
-    class0: 'rgba(200, 9, 0, 0.8)',  // red
-    class1: 'rgba(0, 150, 255, 0.8)',  // blue
-    class2: 'rgba(0, 255, 150, 0.8)', // green
-    class3: 'rgba(0, 250, 150, 0.8)'  // light green
+    class0: 'rgba(0, 255, 0, 0.8)',    // green (start)
+    class1: 'rgba(255, 0, 0, 0.8)',    // red (end)
+    class2: 'rgba(255, 255, 255, 0.8)', // white (regular cell)
+    class3: 'rgba(0, 0, 0, 0.8)',       // black (obstacle)
+    class4: 'rgba(0, 0, 255, 0.8)'       // blue (path)
 };
 
-// Array to count occurrences of each type of cell
-const counts = [0, 0, 0];
-
+// Setup the grid
 function setup() {
-    const rows = Math.floor(canvas.height / gridSize);
-    const cols = Math.floor(canvas.width / gridSize);
+    const rows = Math.floor(canvas.height / cellSize);
+    const cols = Math.floor(canvas.width / cellSize);
 
     for (let i = 0; i < cols; i++) {
         grid[i] = [];
         for (let j = 0; j < rows; j++) {
-            // Create a rectangle object with initial state 0
-            const rectangle = {
-                x: i * gridSize,
-                y: j * gridSize,
-                width: gridSize,
-                height: gridSize,
-                class: 'class0',  // Start with class0
-                state: 0
+            // Initialize each cell as a regular cell (class2)
+            grid[i][j] = {
+                x: i * cellSize,
+                y: j * cellSize,
+                width: cellSize,
+                height: cellSize,
+                class: 'class2',  // Start as a regular cell
+                state: 2  // 0: start, 1: end, 2: regular cell, 3: obstacle
             };
-            grid[i][j] = rectangle;
         }
     }
 }
 
+// Get grid indices from pixel coordinates
+function get_index(x, y) {
+    return {
+        x: Math.floor(x / cellSize),
+        y: Math.floor(y / cellSize)
+    };
+}
+
+// Draw the grid
 function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas before drawing
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
             const rect = grid[i][j];
-            c.fillStyle = colors[rect.class];  // Use rect.class here
+            c.fillStyle = colors[rect.class];  // Use rect.class to set color
             c.fillRect(rect.x, rect.y, rect.width, rect.height);
             c.strokeRect(rect.x, rect.y, rect.width, rect.height);  // Outline the grid
         }
     }
 }
 
-canvas.addEventListener('click', function(event) {
+// Handle mouse events
+canvas.addEventListener('mousedown', function(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
+    const pos = get_index(mouseX, mouseY);
+    const cell = grid[pos.x][pos.y];
 
-    for (let i = 0; i < grid.length; i++) {
-        for (let j = 0; j < grid[i].length; j++) {
-            const cell = grid[i][j];
-            if (mouseX > cell.x && mouseX < cell.x + cell.width &&
-                mouseY > cell.y && mouseY < cell.y + cell.height) {
-                console.log(`Cell [${i}, ${j}] clicked!`);  // Log the clicked cell
+    if (start && pos.x === start.x && pos.y === start.y) {
+        dragging = true;
+        dragTarget = 'start';
+    } else if (end && pos.x === end.x && pos.y === end.y) {
+        dragging = true;
+        dragTarget = 'end';
+    } else {
+        if (!start) {
+            start = pos;
+            cell.class = 'class0';  // Mark as start cell (green)
+            cell.state = 0;
+        } else if (!end) {
+            end = pos;
+            cell.class = 'class1';  // Mark as end cell (red)
+            cell.state = 1;
+        } else {
+            // Toggle between obstacle (black) and regular cell (white)
+            cell.class = cell.class === 'class3' ? 'class2' : 'class3';  
+            cell.state = cell.class === 'class3' ? 3 : 2;
+        }
+    }
 
-                // Decrement the count for the current state
-                counts[cell.state]--;
+    draw();  // Redraw the grid with updated state
+});
 
-                // Increment the state and wrap it using modulo
-                cell.state = (cell.state + 1) % 4;
-                counts[cell.state]++;
+canvas.addEventListener('mousemove', function(event) {
+    if (dragging) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        const pos = get_index(mouseX, mouseY);
+        const cell = grid[pos.x][pos.y];
 
-                // Update the class based on the state
-                cell.class = `class${cell.state}`;
-
-                console.log(cell.class); // Debugging output for the class
-
-                draw();  // Redraw the grid with the updated colors
+        if (dragTarget === 'start') {
+            if (start) {
+                grid[start.x][start.y].class = 'class2';  // Reset previous start cell
             }
+            start = pos;
+            cell.class = 'class0';  // Mark as start cell (green)
+            draw();  // Redraw the grid with updated state
+        } else if (dragTarget === 'end') {
+            if (end) {
+                grid[end.x][end.y].class = 'class2';  // Reset previous end cell
+            }
+            end = pos;
+            cell.class = 'class1';  // Mark as end cell (red)
+            draw();  // Redraw the grid with updated state
+        } else {
+            // Update obstacle cells while dragging
+            cell.class = 'class3';  // Mark as obstacle (black)
+            cell.state = 3;
+            draw();  // Redraw the grid with updated state
         }
     }
 });
 
-// Initial setup and drawing
+canvas.addEventListener('mouseup', function() {
+    dragging = false;
+    dragTarget = null;
+});
+
+// Check if a move is valid
+function isValidMove(x, y, grid, visited) {
+    if (x < 0 || y < 0 || x >= grid[0].length || y >= grid.length) {
+        return false;
+    }
+    if (visited.has(`${x},${y}`)) {
+        return false;
+    }
+    if (grid[y][x].class === 'class3') { // Assuming class3 is an obstacle
+        return false;
+    }
+    return true;
+}
+
+// Find and draw the path using BFS
+function findpath() {
+    if (!start || !end) {
+        console.log("Start or end point is not set.");
+        return;
+    }
+
+    // Clear previous path
+    grid.forEach(row => row.forEach(cell => {
+        if (cell.class === 'class4') {
+            cell.class = 'class2'; // Reset path cells to regular cells
+        }
+    }));
+
+    const queue = [start];
+    const visited = new Set();
+    const parent = new Map();
+    const path = [];
+
+    visited.add(`${start.x},${start.y}`);
+    parent.set(`${start.x},${start.y}`, null);
+
+    while (queue.length > 0) {
+        const node = queue.shift();
+        console.log("Visiting node:", node);
+
+        // Check if we reached the end
+        if (node.x === end.x && node.y === end.y) {
+            let pathNode = node;
+            while (pathNode) {
+                path.push(pathNode);
+                pathNode = parent.get(`${pathNode.x},${pathNode.y}`);
+            }
+            path.reverse(); // Reverse the path to get it from start to end
+
+            // Mark the path on the grid
+            path.forEach(p => {
+                if (grid[p.y][p.x].class !== 'class0' && grid[p.y][p.x].class !== 'class1') {
+                    grid[p.y][p.x].class = 'class4'; // Mark the path
+                }
+            });
+            draw(); // Redraw the grid with the path
+            console.log("Path found:", path);
+            return;
+        }
+
+        for (let i = 0; i < 4; i++) {
+            const newX = node.x + dirx[i];
+            const newY = node.y + diry[i];
+            const newPos = { x: newX, y: newY };
+
+            if (isValidMove(newX, newY, grid, visited)) {
+                visited.add(`${newX},${newY}`);
+                queue.push(newPos);
+                parent.set(`${newX},${newY}`, node);
+                console.log("Queue updated:", queue);
+            }
+        }
+    }
+
+    console.log("No path found.");
+}
+
+// Set up and draw the initial grid
 setup();
 draw();
+
+// Add event listener to the button
+document.getElementById('findPathButton').addEventListener('click', findpath);
