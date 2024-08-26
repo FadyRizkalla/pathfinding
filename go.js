@@ -1,13 +1,17 @@
+import { bfs } from './bfs.js';
+
 const canvas = document.getElementById("canvas1");
 const c = canvas.getContext('2d');
 
 // Set the canvas dimensions to 150x150 pixels
+
 canvas.width = 150;
 canvas.height = 150;
 
 // Grid and cell size
 const cellSize = 30;
 const grid = [];
+
 
 // Start and end points
 let start = null;
@@ -18,7 +22,10 @@ let dragging = false;
 let dragTarget = null;
 const dirx = [0, 0, 1, -1];
 const diry = [1, -1, 0, 0];
+class Queue{
+  
 
+}
 // Define colors for each class
 const colors = {
     class0: 'rgba(0, 255, 0, 0.8)',    // green (start)
@@ -33,9 +40,9 @@ function setup() {
     const rows = Math.floor(canvas.height / cellSize);
     const cols = Math.floor(canvas.width / cellSize);
 
-    for (let i = 0; i < cols; i++) {
+    for (let i = 0; i < rows; i++) {
         grid[i] = [];
-        for (let j = 0; j < rows; j++) {
+        for (let j = 0; j < cols; j++) {
             // Initialize each cell as a regular cell (class2)
             grid[i][j] = {
                 x: i * cellSize,
@@ -134,6 +141,7 @@ canvas.addEventListener('mousemove', function(event) {
     }
 });
 
+
 canvas.addEventListener('mouseup', function() {
     dragging = false;
     dragTarget = null;
@@ -165,60 +173,18 @@ function findpath() {
         if (cell.class === 'class4') {
             cell.class = 'class2'; // Reset path cells to regular cells
         }
+       
+           console.log(cell);
+        
     }));
-
-    const queue = [start];
-    const visited = new Set();
-    const parent = new Map();
-    const path = [];
-
-    visited.add(`${start.x},${start.y}`);
-    parent.set(`${start.x},${start.y}`, null);
-
-    while (queue.length > 0) {
-        const node = queue.shift();
-        console.log("Visiting node:", node);
-
-        // Check if we reached the end
-        if (node.x === end.x && node.y === end.y) {
-            let pathNode = node;
-            while (pathNode) {
-                path.push(pathNode);
-                pathNode = parent.get(`${pathNode.x},${pathNode.y}`);
-            }
-            path.reverse(); // Reverse the path to get it from start to end
-
-            // Mark the path on the grid
-            path.forEach(p => {
-                if (grid[p.y][p.x].class !== 'class0' && grid[p.y][p.x].class !== 'class1') {
-                    grid[p.y][p.x].class = 'class4'; // Mark the path
-                }
-            });
-            draw(); // Redraw the grid with the path
-            console.log("Path found:", path);
-            return;
-        }
-
-        for (let i = 0; i < 4; i++) {
-            const newX = node.x + dirx[i];
-            const newY = node.y + diry[i];
-            const newPos = { x: newX, y: newY };
-
-            if (isValidMove(newX, newY, grid, visited)) {
-                visited.add(`${newX},${newY}`);
-                queue.push(newPos);
-                parent.set(`${newX},${newY}`, node);
-                console.log("Queue updated:", queue);
-            }
-        }
-    }
-
-    console.log("No path found.");
+ 
+     bfs(grid,start,end,dirx,diry,draw);
+   
+   
+   // console.log("No path found.");
 }
-
 // Set up and draw the initial grid
 setup();
 draw();
-
 // Add event listener to the button
 document.getElementById('findPathButton').addEventListener('click', findpath);
