@@ -5,8 +5,8 @@ const c = canvas.getContext('2d');
 
 // Set the canvas dimensions to 150x150 pixels
 
-canvas.width = 150;
-canvas.height = 150;
+canvas.width = 1000;
+canvas.height = 1000;
 
 // Grid and cell size
 const cellSize = 30;
@@ -32,7 +32,8 @@ const colors = {
     class1: 'rgba(255, 0, 0, 0.8)',    // red (end)
     class2: 'rgba(255, 255, 255, 0.8)', // white (regular cell)
     class3: 'rgba(0, 0, 0, 0.8)',       // black (obstacle)
-    class4: 'rgba(0, 0, 255, 0.8)'       // blue (path)
+    class4: 'rgba(0, 0, 255, 0.8)',     // blue (path)
+    class5: 'rgba(128, 0, 128, 0.8)'     // purple (animated or considered cell)
 };
 
 // Setup the grid
@@ -50,6 +51,7 @@ function setup() {
                 width: cellSize,
                 height: cellSize,
                 class: 'class2',  // Start as a regular cell
+                animate:0,
                 state: 2  // 0: start, 1: end, 2: regular cell, 3: obstacle
             };
         }
