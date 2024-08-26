@@ -5,37 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pathfinding Visualization</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
         #canvas1 {
-            position: absolute;
-            top: 0;
-            left: 0;
             border: 1px solid black;
-        }
-        #buttonContainer {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-        }
-        button {
-            font-size: 16px;
-            padding: 10px 20px;
         }
     </style>
 </head>
 <body>
-   
-    </body>
     <canvas id="canvas1"></canvas>
-    <div id="buttonContainer">
-        <button id="findPathButton">Find Path</button>
-        <button id="clear">Find Path</button>
-    </div>
+    <button id="findPathButton">Find Path</button>
+    <button id="resetButton">Reset</button>
+    <!-- Include JavaScript files as modules -->
     <script type="module" src="go.js"></script>
-    <!-- Ensure this is the correct path to your JS file -->
+    <script type="module" src="main.js"></script>
 </body>
 </html>
