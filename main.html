@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pathfinding Visualization</title>
-    <style>
-        #canvas1 {
-            border: 1px solid black;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <canvas id="canvas1"></canvas>
-    <button id="findPathButton">Find Path</button>
-    <button id="resetButton">Reset</button>
-    <!-- Include JavaScript files as modules -->
-    <script type="module" src="go.js"></script>
-    <script type="module" src="main.js"></script>
+    <h1>Pathfinding Visualization with BFS</h1>
+    <div id="controls">
+        <button id="bfsButton">Run BFS</button>
+        <button id="resetButton">Reset Grid</button>
+    </div>
+    <div id="grid-container"></div>
+    <script src="go.js"></script>
 </body>
 </html>

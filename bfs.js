@@ -14,15 +14,12 @@ export function bfs(grid, start, end, dirx, diry, draw) {
         if (node.x === end.x && node.y === end.y) {
             let pathNode = node;
             while (pathNode) {
-                if(pathnode!=end){
-                    path.push(pathNode);
-                }
-            
+                path.push(pathNode);
                 pathNode = parent.get(`${pathNode.x},${pathNode.y}`);
             }
             path.reverse();
             path.forEach(p => {
-                if (grid[p.y][p.x].class !== 'class0' && grid[p.y][p.x].class !== 'class1') {
+                if (grid[p.y][p.x].class !== 'class0' ) {
                     grid[p.y][p.x].class = 'class4';
                 }
             });

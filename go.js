@@ -1,159 +1,152 @@
-// main.js
-
-import { bfs } from './bfs.js';
-
-const canvas = document.getElementById("canvas1");
-const c = canvas.getContext('2d');
-
-// Set the canvas dimensions
-canvas.width = 1000;
-canvas.height = 1000;
-
-// Grid and cell size
-const cellSize = 30;
-const grid = [];
-
-// Start and end points
-let start = null;
-let end = null;
-
-// Dragging state
+const gridContainer = document.getElementById('grid-container');
+const rows = 20;
+const cols = 20;
+let grid = [];
 let dragging = false;
 let dragTarget = null;
-const dirx = [0, 0, 1, -1];
-const diry = [1, -1, 0, 0];
+const start = { x: 1, y: 2 };
+const end = { x: 1, y: 9 };
 
-// Define colors for each class
-const colors = {
-    class0: 'rgba(0, 255, 0, 0.8)',    // green (start)
-    class1: 'rgba(255, 0, 0, 0.8)',    // red (end)
-    class2: 'rgba(255, 255, 255, 0.8)', // white (regular cell)
-    class3: 'rgba(0, 0, 0, 0.8)',       // black (obstacle)
-    class4: 'rgba(0, 0, 255, 0.8)',     // blue (path)
-    class5: 'rgba(128, 0, 128, 0.8)'    // purple (animated or considered cell)
-};
-
-// Setup the grid
-function setup() {
-    const rows = Math.floor(canvas.height / cellSize);
-    const cols = Math.floor(canvas.width / cellSize);
+function createGrid() {
+    grid = [];
+    gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+    gridContainer.innerHTML = '';
 
     for (let i = 0; i < rows; i++) {
-        grid[i] = [];
+        const row = [];
         for (let j = 0; j < cols; j++) {
-            grid[i][j] = {
-                x: j * cellSize,  // Correct x position (column)
-                y: i * cellSize,  // Correct y position (row)
-                width: cellSize,
-                height: cellSize,
-                class: 'class2',  // Start as a regular cell
-            };
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+
+            if (i === start.x && j === start.y) {
+                cell.classList.add('start');
+                row.push({ 'element': cell, 'state': 'start' });
+            } else if (i === end.x && j === end.y) {
+                cell.classList.add('end');
+                row.push({ 'element': cell, 'state': 'end' });
+            } else {
+                row.push({ 'element': cell, 'state': 'empty' });
+            }
+
+            cell.addEventListener('mousedown', onMouseDown);
+            cell.addEventListener('mouseenter', onMouseEnter);
+            cell.addEventListener('mouseup', onMouseUp);
+
+            gridContainer.appendChild(cell);
         }
+        grid.push(row);
     }
 }
 
-// Get grid indices from pixel coordinates
-function get_index(x, y) {
-    return {
-        x: Math.floor(x / cellSize),
-        y: Math.floor(y / cellSize)
-    };
-}
+function onMouseDown(event) {
+    const cell = event.target;
+    const x = parseInt(cell.dataset.row);
+    const y = parseInt(cell.dataset.col);
 
-// Draw the grid
-function draw() {
-    c.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas before drawing
-    for (let i = 0; i < grid.length; i++) {
-        for (let j = 0; j < grid[i].length; j++) {
-            const rect = grid[i][j];
-            c.fillStyle = colors[rect.class];
-            c.fillRect(rect.x, rect.y, rect.width, rect.height);
-            c.strokeRect(rect.x, rect.y, rect.width, rect.height);
-        }
-    }
-}
-
-// Handle mouse events
-canvas.addEventListener('mousedown', function(event) {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    const pos = get_index(mouseX, mouseY);
-    const cell = grid[pos.y][pos.x]; // Correctly use y for row and x for column
-
-    if (start && pos.x === start.x && pos.y === start.y) {
+    if (grid[x][y].state === 'start') {
         dragging = true;
         dragTarget = 'start';
-    } else if (end && pos.x === end.x && pos.y === end.y) {
+    } else if (grid[x][y].state === 'end') {
         dragging = true;
         dragTarget = 'end';
     } else {
-        if (!start) {
-            start = pos;
-            cell.class = 'class0';  // Mark as start cell (green)
-        } else if (!end) {
-            end = pos;
-            cell.class = 'class1';  // Mark as end cell (red)
-        } else {
-            cell.class = cell.class === 'class3' ? 'class2' : 'class3';  
-        }
+        
+        toggleWall(x, y);
+        dragging = true;
+        dragTarget = 'wall';
     }
-
-    draw();  // Redraw the grid with updated state
-});
-
-canvas.addEventListener('mousemove', function(event) {
-    if (dragging) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
-        const pos = get_index(mouseX, mouseY);
-        const cell = grid[pos.y][pos.x]; // Correctly use y for row and x for column
-
-        if (dragTarget === 'start') {
-            if (start) {
-                grid[start.y][start.x].class = 'class2';  // Reset previous start cell
-            }
-            start = pos;
-            cell.class = 'class0';  // Mark as start cell (green)
-        } else if (dragTarget === 'end') {
-            if (end) {
-                grid[end.y][end.x].class = 'class2';  // Reset previous end cell
-            }
-            end = pos;
-            cell.class = 'class1';  // Mark as end cell (red)
-        } else {
-            cell.class = 'class3';  // Mark as obstacle (black)
-        }
-        draw();  // Redraw the grid with updated state
-    }
-});
-
-canvas.addEventListener('mouseup', function() {
-    dragging = false;
-    dragTarget = null;
-});
-
-// Find and draw the path using BFS
-function findpath() {
-    if (!start || !end) {
-        console.log("Start or end point is not set.");
-        return;
-    }
-
-    // Clear previous path
-    grid.forEach(row => row.forEach(cell => {
-        if (cell.class === 'class4') {
-            cell.class = 'class2'; // Reset path cells to regular cells
-        }
-    }));
- 
-    bfs(grid, start, end, dirx, diry, draw);
 }
 
-// Set up and draw the initial grid
-setup();
-draw();
+function onMouseEnter(event) {
+    if (dragging) {
+        const cell = event.target;
+        const x = parseInt(cell.dataset.row);
+        const y = parseInt(cell.dataset.col);
 
-// Add event listener to the button
-document.getElementById('findPathButton').addEventListener('click', findpath);
+        if (dragTarget === 'start') {
+            updateStartPosition(x, y);
+        } else if (dragTarget === 'end') {
+            updateEndPosition(x, y);
+        }else if(dragTarget=='wall'){
+           if(grid[x][y].state=='empty'){
+            toggleWall(x,y);
+           }
+        }
+    }
+}
+
+function onMouseUp(event) {
+    dragging = false;
+    dragTarget = null;
+}
+
+function toggleWall(x, y) {
+    const cell = grid[x][y];
+    if (cell.state === 'empty') {
+        cell.state = 'wall';
+        cell.element.classList.add('wall');
+    } else if (cell.state === 'wall') {
+        cell.state = 'empty';
+        cell.element.classList.remove('wall');
+    }
+}
+
+function updateStartPosition(x, y) {
+    // Clear previous start position
+    grid[start.x][start.y].element.classList.remove('start');
+    grid[start.x][start.y].state = 'empty';
+
+    // Update to new position
+    start.x = x;
+    start.y = y;
+    grid[x][y].element.classList.add('start');
+    grid[x][y].state = 'start';
+}
+
+function updateEndPosition(x, y) {
+    // Clear previous end position
+    grid[end.x][end.y].element.classList.remove('end');
+    grid[end.x][end.y].state = 'empty';
+
+    // Update to new position
+    end.x = x;
+    end.y = y;
+    grid[x][y].element.classList.add('end');
+    grid[x][y].state = 'end';
+}
+function draw() {
+    // Iterate over each row in the grid
+    grid.forEach(row => {
+        // Iterate over each cell in the row
+        row.forEach(cell => {
+            // Remove all previously applied classes to reset the cell's visual state
+            cell.element.className = 'grid-cell';
+
+            // Apply the appropriate class based on the cell's current state
+            if (cell.state === 'start') {
+                cell.element.classList.add('start');
+            } else if (cell.state === 'end') {
+                cell.element.classList.add('end');
+            } else if (cell.state === 'wall') {
+                cell.element.classList.add('wall');
+            } else if (cell.state === 'visited') {
+                cell.element.classList.add('visited');
+            } else if (cell.state === 'path') {
+                cell.element.classList.add('path');
+            }
+        });
+    });
+}
+
+createGrid();
+
+// Add event listeners for your buttons to trigger different algorithms
+document.getElementById('bfsButton').addEventListener('click', () => {
+    bfs(grid, start, end, dirx, diry, draw);
+});
+
+document.getElementById('resetButton').addEventListener('click', () => {
+    createGrid();
+});
