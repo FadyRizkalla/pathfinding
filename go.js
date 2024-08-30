@@ -1,12 +1,12 @@
 const gridContainer = document.getElementById('grid-container');
-const rows = 20;
-const cols = 20;
+const rows = 25;
+const cols = 25;
 let grid = [];
 let dragging = false;
 let dragTarget = null;
-const start = { x: 1, y: 2 };
-const end = { x: 1, y: 9 };
-
+let start = { x: 1, y: 2 };
+let end = { x: 1, y: 9 };
+let speed=30;
 function createGrid() {
     grid = [];
     gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
@@ -22,12 +22,12 @@ function createGrid() {
 
             if (i === start.x && j === start.y) {
                 cell.classList.add('start');
-                row.push({ 'element': cell, 'state': 'start' });
+                row.push({ element: cell, state: 'start' });
             } else if (i === end.x && j === end.y) {
                 cell.classList.add('end');
-                row.push({ 'element': cell, 'state': 'end' });
+                row.push({ element: cell, state: 'end' });
             } else {
-                row.push({ 'element': cell, 'state': 'empty' });
+                row.push({ element: cell, state: 'empty' });
             }
 
             cell.addEventListener('mousedown', onMouseDown);
@@ -52,7 +52,6 @@ function onMouseDown(event) {
         dragging = true;
         dragTarget = 'end';
     } else {
-        
         toggleWall(x, y);
         dragging = true;
         dragTarget = 'wall';
@@ -69,15 +68,15 @@ function onMouseEnter(event) {
             updateStartPosition(x, y);
         } else if (dragTarget === 'end') {
             updateEndPosition(x, y);
-        }else if(dragTarget=='wall'){
-           if(grid[x][y].state=='empty'){
-            toggleWall(x,y);
-           }
+        } else if (dragTarget === 'wall') {
+            if (grid[x][y].state === 'empty') {
+                toggleWall(x, y);
+            }
         }
     }
 }
 
-function onMouseUp(event) {
+function onMouseUp() {
     dragging = false;
     dragTarget = null;
 }
@@ -94,37 +93,28 @@ function toggleWall(x, y) {
 }
 
 function updateStartPosition(x, y) {
-    // Clear previous start position
     grid[start.x][start.y].element.classList.remove('start');
     grid[start.x][start.y].state = 'empty';
 
-    // Update to new position
-    start.x = x;
-    start.y = y;
+    start = { x, y };
     grid[x][y].element.classList.add('start');
     grid[x][y].state = 'start';
 }
 
 function updateEndPosition(x, y) {
-    // Clear previous end position
     grid[end.x][end.y].element.classList.remove('end');
     grid[end.x][end.y].state = 'empty';
 
-    // Update to new position
-    end.x = x;
-    end.y = y;
+    end = { x, y };
     grid[x][y].element.classList.add('end');
     grid[x][y].state = 'end';
 }
+
 function draw() {
-    // Iterate over each row in the grid
     grid.forEach(row => {
-        // Iterate over each cell in the row
         row.forEach(cell => {
-            // Remove all previously applied classes to reset the cell's visual state
             cell.element.className = 'grid-cell';
 
-            // Apply the appropriate class based on the cell's current state
             if (cell.state === 'start') {
                 cell.element.classList.add('start');
             } else if (cell.state === 'end') {
@@ -140,13 +130,69 @@ function draw() {
     });
 }
 
-createGrid();
+function bfs(grid, start, end) {
+    const queue = [start];
+    const visited = new Set();
+    const parent = new Map();
+    const path = [];
+    const dirx = [1, 0, -1, 0];
+    const diry = [0, 1, 0, -1];
 
-// Add event listeners for your buttons to trigger different algorithms
+    visited.add(`${start.x},${start.y}`);
+    parent.set(`${start.x},${start.y}`, null);
+
+    while (queue.length > 0) {
+        const node = queue.shift();
+
+        if (node.x === end.x && node.y === end.y) {
+            let pathNode = node;
+            while (pathNode) {
+                path.push(pathNode);
+                pathNode = parent.get(`${pathNode.x},${pathNode.y}`);
+            }
+            path.reverse();
+            path.forEach(p => {
+                if (grid[p.x][p.y].state !== 'start' && grid[p.x][p.y].state !== 'end') {
+                    grid[p.x][p.y].state = 'path';
+                    draw();
+                    setTimeout(speed);
+                }
+            });
+            draw();
+            return;
+        }
+
+        for (let i = 0; i < 4; i++) {
+            const newX = node.x + dirx[i];
+            const newY = node.y + diry[i];
+            const newPos = { x: newX, y: newY };
+
+            if (isValidMove(newX, newY, grid, visited)) {
+                grid[newX][newY].state = 'visited';
+                visited.add(`${newX},${newY}`);
+                queue.push(newPos);
+                parent.set(`${newX},${newY}`, node);
+            }
+        }
+        draw();
+    }
+
+    console.log('No path found.');
+}
+
+function isValidMove(x, y, grid, visited) {
+    if (x < 0 || y < 0 || x >= rows || y >= cols) return false;
+    if (visited.has(`${x},${y}`)) return false;
+    if (grid[x][y].state === 'wall') return false;
+    return true;
+}
+
 document.getElementById('bfsButton').addEventListener('click', () => {
-    bfs(grid, start, end, dirx, diry, draw);
+    bfs(grid, start, end);
 });
 
 document.getElementById('resetButton').addEventListener('click', () => {
     createGrid();
 });
+
+createGrid();

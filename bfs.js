@@ -1,11 +1,11 @@
 // bfs.js
 
 export function bfs(grid, start, end, dirx, diry, draw) {
-    const queue = [start];
+    const queue = [{ x: start.x, y: start.y }];
     const visited = new Set();
     const parent = new Map();
     const path = [];
-
+    
     visited.add(`${start.x},${start.y}`);
     parent.set(`${start.x},${start.y}`, null);
 
@@ -19,8 +19,9 @@ export function bfs(grid, start, end, dirx, diry, draw) {
             }
             path.reverse();
             path.forEach(p => {
-                if (grid[p.y][p.x].class !== 'class0' ) {
-                    grid[p.y][p.x].class = 'class4';
+                if (grid[p.x][p.y].state !== 'start' && grid[p.x][p.y].state !== 'end') {
+                    grid[p.x][p.y].element.classList.add('path'); // Use CSS class for path
+                    grid[p.x][p.y].state = 'path';
                 }
             });
             draw();
@@ -33,26 +34,27 @@ export function bfs(grid, start, end, dirx, diry, draw) {
             const newPos = { x: newX, y: newY };
 
             if (isValidMove(newX, newY, grid, visited)) {
-                grid[newY][newX].class = 'class5';
+                grid[newX][newY].element.classList.add('visited'); // Use CSS class for visited nodes
+                grid[newX][newY].state = 'visited';
                 visited.add(`${newX},${newY}`);
                 queue.push(newPos);
                 parent.set(`${newX},${newY}`, node);
             }
         }
-        setTimeout(() => draw(), 50); // Adjust the timeout for animation
+        setTimeout(draw, 50); // Adjust the timeout for animation
     }
 
     console.log("No path found.");
 }
 
 function isValidMove(x, y, grid, visited) {
-    if (x < 0 || y < 0 || x >= grid[0].length || y >= grid.length) {
+    if (x < 0 || y < 0 || x >= grid.length || y >= grid[0].length) {
         return false;
     }
     if (visited.has(`${x},${y}`)) {
         return false;
     }
-    if (grid[y][x].class === 'class3') { // Assuming class3 is an obstacle
+    if (grid[x][y].state === 'wall') { // Assuming 'wall' is the state for obstacles
         return false;
     }
     return true;
