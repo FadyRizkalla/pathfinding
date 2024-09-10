@@ -78,10 +78,13 @@ h1 {
    
     display: grid;
     margin: 20px auto;
+    position: static;
+    left:90px;
     gap: 1px;
     border: 1px solid #ddd;
     width: 100vw; /* Full width of the viewport */
     height: 100vh; /
+    
 }
 
 .grid-cell {

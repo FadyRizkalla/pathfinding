@@ -200,7 +200,7 @@ async function recursiveDivision(x, y, x1, y1, depth = 0) {
     // Calculate height and width
     let height = x1 - x;
     let width = y1 - y;
-
+    console.log(depth);
     if (height > width) {
         // Step 1: Select a random row for the horizontal wall (within the current bounds)
         let row = Math.floor(Math.random() * (x1 - x - 1)) + x + 1;
@@ -221,7 +221,7 @@ async function recursiveDivision(x, y, x1, y1, depth = 0) {
                 if (i !== gap) { // Leave a gap at the randomly chosen position
                     grid[row][i].element.classList.add('wall');
                     grid[row][i].state = 'wall';  // Mark it as a wall in the grid state
-                    blocked.add(`${row},${i}`);  // Add to blocked set
+                   // Add to blocked set
                     await delay(speed);  // Animate the wall drawing
                 }
             }
@@ -253,7 +253,7 @@ async function recursiveDivision(x, y, x1, y1, depth = 0) {
                 if (i !== gap) { // Leave a gap at the randomly chosen position
                     grid[i][col].element.classList.add('wall');
                     grid[i][col].state = 'wall';  // Mark it as a wall in the grid state
-                    blocked.add(`${i},${col}`);  // Add to blocked set
+                    // Add to blocked set
                     await delay(speed);  // Animate the wall drawing
                 }
             }
@@ -284,7 +284,7 @@ async function drawBorder() {
     for (let col = 0; col < cols; col++) {
         grid[0][col].element.classList.add('wall');
         grid[0][col].state='wall';
-        blocked.add(`${col},0`);
+       
         await delay(speed); // Delay for animation
     }
 
@@ -292,7 +292,7 @@ async function drawBorder() {
     for (let row = 1; row < rows; row++) {
         grid[row][cols - 1].element.classList.add('wall');
         grid[row][cols - 1].state='wall';
-        blocked.add(`${cols - 1},${row}`);
+      
         await delay(speed); // Delay for animation
     }
 
@@ -300,7 +300,7 @@ async function drawBorder() {
     for (let col = cols - 2; col >= 0; col--) {
         grid[rows - 1][col].element.classList.add('wall');
         grid[rows - 1][col].state='wall';
-        blocked.add(`${col},${rows - 1}`);
+      
         await delay(speed); // Delay for animation
     }
 
@@ -308,7 +308,7 @@ async function drawBorder() {
     for (let row = rows - 2; row > 0; row--) {
         grid[row][0].element.classList.add('wall');
         grid[row][0].state='wall';
-        blocked.add(`0,${row}`);
+       
         await delay(speed); // Delay for animation
     }
 }
