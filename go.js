@@ -1,7 +1,7 @@
 const gridContainer = document.getElementById('grid-container');
 
-const rows = 25;
-const cols = 25;
+const rows = 50;
+const cols = 50;
 let grid = [];
 let dragging = false;
 let dragTarget = null;

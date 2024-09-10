@@ -72,6 +72,7 @@ h1 {
 
 /* Grid Container */
 #grid-container {
+   
     display: grid;
     margin: 20px auto;
     gap: 1px;
