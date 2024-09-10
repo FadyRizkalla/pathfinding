@@ -1,13 +1,15 @@
 const gridContainer = document.getElementById('grid-container');
+const cellSize=30;
 
-const rows = 50;
-const cols = 50;
+const cols = Math.floor(window.innerWidth / cellSize);
+const rows = Math.floor(window.innerHeight / cellSize);
+
 let grid = [];
 let dragging = false;
 let dragTarget = null;
 let start = { x: 3, y: 2 };
 let end = { x: 1, y: 9 };
-let speed=30;
+let speed=20;
 
 const blocked = new Set();
 function createGrid() {
