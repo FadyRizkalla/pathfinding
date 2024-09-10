@@ -1,12 +1,15 @@
 const gridContainer = document.getElementById('grid-container');
+
 const rows = 25;
 const cols = 25;
 let grid = [];
 let dragging = false;
 let dragTarget = null;
-let start = { x: 1, y: 2 };
+let start = { x: 3, y: 2 };
 let end = { x: 1, y: 9 };
-let speed=30;
+let speed=90;
+
+const blocked = new Set();
 function createGrid() {
     grid = [];
     gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
@@ -130,7 +133,7 @@ function draw() {
     });
 }
 
-function bfs(grid, start, end) {
+async function bfs(grid, start, end) {
     const queue = [start];
     const visited = new Set();
     const parent = new Map();
@@ -151,13 +154,15 @@ function bfs(grid, start, end) {
                 pathNode = parent.get(`${pathNode.x},${pathNode.y}`);
             }
             path.reverse();
-            path.forEach(p => {
+            for (const p of path) {
                 if (grid[p.x][p.y].state !== 'start' && grid[p.x][p.y].state !== 'end') {
                     grid[p.x][p.y].state = 'path';
-                    draw();
-                    setTimeout(speed);
+                    grid[p.x][p.y].element.classList.add('path');  // Update the element's class
+                     // Animation delay
+                     await delay(speed);
+                  //  draw();  // Ensure the grid is redrawn to reflect changes
                 }
-            });
+            }
             draw();
             return;
         }
@@ -169,15 +174,27 @@ function bfs(grid, start, end) {
 
             if (isValidMove(newX, newY, grid, visited)) {
                 grid[newX][newY].state = 'visited';
+                if(newX==end.x&&newY==end.y){
+                   
+                }else{
+                    grid[newX][newY].element.classList.add('visited');
+                }
+               
                 visited.add(`${newX},${newY}`);
                 queue.push(newPos);
                 parent.set(`${newX},${newY}`, node);
             }
         }
-        draw();
+        await delay(speed);
     }
 
     console.log('No path found.');
+}
+//
+
+
+function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function isValidMove(x, y, grid, visited) {
@@ -186,13 +203,50 @@ function isValidMove(x, y, grid, visited) {
     if (grid[x][y].state === 'wall') return false;
     return true;
 }
+async function drawBorder() {
+    // Top border
+    for (let col = 0; col < cols; col++) {
+        grid[0][col].element.classList.add('wall');
+        blocked.add(`${col},0`);
+        await delay(speed); // Delay for animation
+    }
 
-document.getElementById('bfsButton').addEventListener('click', () => {
-    bfs(grid, start, end);
-});
+    // Right border
+    for (let row = 1; row < rows; row++) {
+        grid[row][cols - 1].element.classList.add('wall');
+        blocked.add(`${cols - 1},${row}`);
+        await delay(speed); // Delay for animation
+    }
 
-document.getElementById('resetButton').addEventListener('click', () => {
+    // Bottom border
+    for (let col = cols - 2; col >= 0; col--) {
+        grid[rows - 1][col].element.classList.add('wall');
+        blocked.add(`${col},${rows - 1}`);
+        await delay(speed); // Delay for animation
+    }
+
+    // Left border
+    for (let row = rows - 2; row > 0; row--) {
+        grid[row][0].element.classList.add('wall');
+        blocked.add(`0,${row}`);
+        await delay(speed); // Delay for animation
+    }
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+document.getElementById('recursiveMaze').addEventListener('click', () => {
+
     createGrid();
+drawBorder();
+
+    //recursiveDivision(grid, 0, 0, rows, cols, blocked, start, end);
+});
+document.getElementById('bfsAlgorithm').addEventListener('click', async () => {
+    await bfs(grid, start, end);
 });
 
 createGrid();

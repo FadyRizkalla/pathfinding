@@ -1,71 +1,133 @@
+/* General Styles */
 body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     font-family: Arial, sans-serif;
-    background-color: #282c34;
-    color: #61dafb;
     margin: 0;
     padding: 0;
-    height: 100vh;
-    justify-content: center;
+    background-color: #f4f4f4;
 }
 
 h1 {
-    margin-bottom: 20px;
+    text-align: center;
+    margin-top: 20px;
 }
 
-#controls {
-    margin-bottom: 10px;
+/* Navigation Bar */
+.navbar {
+    display: flex;
+    justify-content: center;
+    background-color: #333;
+    padding: 10px;
 }
 
-button {
+.navbar .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.navbar .dropbtn {
+    background-color: #4CAF50;
+    color: white;
     padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #61dafb;
-    color: #282c34;
     font-size: 16px;
+    border: none;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-button:hover {
-    background-color: #21a1f1;
+.navbar .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
 }
 
+.navbar .dropdown-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar .dropdown-content ul li {
+    padding: 12px 16px;
+}
+
+.navbar .dropdown-content ul li a {
+    color: black;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar .dropdown-content ul li a:hover {
+    background-color: #ddd;
+}
+
+.navbar .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.navbar .dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
+/* Grid Container */
 #grid-container {
     display: grid;
-    gap: 2px;
+    margin: 20px auto;
+    gap: 1px;
+    border: 1px solid #ddd;
 }
 
 .grid-cell {
     width: 30px;
     height: 30px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.3s;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    transition: background-color 0.3s;
 }
 
 .grid-cell.start {
-    background-color: #76c893;
-    transform: scale(1.1);
+    background-color: green;
 }
 
 .grid-cell.end {
-    background-color: #e76f51;
-    transform: scale(1.1);
+    background-color: red;
 }
 
 .grid-cell.wall {
-    background-color: #264653;
+    background-color: black;
 }
 
 .grid-cell.visited {
-    background-color: #f4a261;
+    background-color: lightblue;
 }
 
 .grid-cell.path {
-    background-color: #2a9d8f;
+    background-color: yellow;
+}
+
+/* Controls */
+#controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#controls button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#controls button:hover {
+    background-color: #45a049;
+}
+
+#controls button:active {
+    background-color: #367c39;
 }

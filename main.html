@@ -7,13 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Pathfinding Visualization with BFS</h1>
+    <div class="navbar">
+        <div class="dropdown">
+            <button class="dropbtn">Algorithms</button>
+            <div class="dropdown-content">
+                <ul>
+                    <li><a href="#" id="bfsAlgorithm">BFS</a></li>
+                    <!-- More algorithms can be added here -->
+                </ul>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Mazes</button>
+            <div class="dropdown-content">
+                <ul>
+                    <li><a href="#" id="recursiveMaze">Recursive Division Maze</a></li>
+                    <!-- More maze generation algorithms can be added here -->
+                </ul>
+            </div>
+        </div>
+    </div>
    
     <div id="grid-container"></div>
-    <div id="controls">
-        <button id="bfsButton">Run BFS</button>
-        <button id="resetButton">Reset Grid</button>
-    </div>
-    <script src="go.js"></script>
+    
+
+    <script type="module" src="go.js"></script>
 </body>
 </html>
