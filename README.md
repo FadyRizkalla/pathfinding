@@ -28,9 +28,9 @@ A fully interactive web-based visualization tool for popular pathfinding and maz
 ## 📸 Screenshots
 
 ### DFS in Action
-![DFS](Screenshots/DFS.gif)
+![DFS](Screenshots/DFS.png)
 
-### A* Search
+### BFS* Search
 ![BFS](Screenshots/BFS.png)
 
 ### Maze Generation
