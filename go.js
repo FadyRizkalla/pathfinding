@@ -3,6 +3,7 @@ const cellSize=30;
 
 const cols = Math.floor(window.innerWidth / cellSize);
 const rows = Math.floor(window.innerHeight / cellSize);
+import { runDFS } from './Dfs.js';
 
 let grid = [];
 let dragging = false;
@@ -329,5 +330,9 @@ document.getElementById('recursiveMaze').addEventListener('click', async() => {
 document.getElementById('bfsAlgorithm').addEventListener('click', async () => {
     await bfs(grid, start, end);
 });
+document.getElementById('dfsAlgorithm').addEventListener('click', async () => {
+    await runDFS(grid, start, end, delay, draw, speed);
+});
+
 
 createGrid();
