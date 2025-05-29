@@ -10,7 +10,7 @@ let dragging = false;
 let dragTarget = null;
 let start = { x: 3, y: 2 };
 let end = { x: 1, y: 9 };
-let speed=20;
+let speed=30;
 
 const blocked = new Set();
 function createGrid() {
