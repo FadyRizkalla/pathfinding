@@ -28,13 +28,13 @@ A fully interactive web-based visualization tool for popular pathfinding and maz
 ## 📸 Screenshots
 
 ### DFS in Action
-![DFS](screenshots/DFS.gif)
+![DFS](Screenshots/DFS.gif)
 
 ### A* Search
-![BFS](screenshots/BFS.png)
+![BFS](Screenshots/BFS.png)
 
 ### Maze Generation
-![Maze](screenshots/Recursive_Division.png)
+![Maze](Screenshots/Recursive_Division.png)
 
 ---
 
